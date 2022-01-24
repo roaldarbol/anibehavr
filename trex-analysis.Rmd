@@ -1,0 +1,193 @@
+---
+title: "TRex Analysis"
+author: "roaldarbol"
+date: "3/25/2021"
+output: 
+  pdf_document:
+    keep_tex: true
+---
+```{r setup, include=FALSE}
+
+# Setup knitr
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+
+# Import libraries and scripts
+library(hexbin)
+library(ggpubr)
+library(sleepr)
+library(tidyverse)
+
+include_env <- TRUE
+n_animals <- 6 # Number of animals in the recordings
+animal_ids <- c("200","201", "202", 
+                "203", "204", "205")
+n_frames_mean <- 30 * 60 * 5 # framerate * seconds * minutes
+
+# Set data folder
+data_path <- "/Users/roaldarbol/tracking/trex/experiments/2022-01-20/results/data"
+```
+
+# TRex
+In this analysis script we'll be cleaning the data, with some help from `python` and `reticulate`. Then we can access the data and plot the trajectories.
+
+## Import and wrangle data
+First we'll import `numpy`, read all `.npz` files in the `data_path` into a list.
+
+
+```{r wrangle data}
+# Import TRex data
+filenames <- list.files(data_path, pattern="*.csv", full.names=TRUE)
+dl <- lapply(filenames, read_csv)
+
+# Then we clean the data to make it a bit more accessible
+df_list <- lapply(dl, csv_clean)
+
+# Import temperature data
+if (include_env == TRUE){
+  env_data <- read_csv('/Users/roaldarbol/tracking/trex/experiments/2022-01-20/environmental_data/2022-01-20_16.37.19.csv')
+}
+
+```
+
+# Rolling filter
+Here we remove `Inf` values (though I don't believe that's an issue in TRex anymore) and applies a rolling mean/median which gives a better representation of the actual **speed** than raw unfiltered data.
+
+```{r clean, warning=FALSE}
+# Removes Inf values
+df_list <- lapply(df_list, inf_remove)
+
+# Add ID and make single dataframe
+df_list <- find_position(df_list, 
+                         exp_setup = "wellplate", 
+                         animal_ids = animal_ids)
+df_locomotion <- merge_videos(df_list) %>% 
+  select(-id)
+
+df_locomotion_short <- df_locomotion %>%
+  mutate(G = trunc(2:(n()+1)/n_frames_mean)) %>% 
+  group_by(G) %>% 
+  summarise(speed = mean(speed),
+            time = min(time)) %>% 
+  select(-G) %>% 
+  mutate(speed_normalised = as.vector(scale(speed)))
+  
+
+
+
+df_locomotion_short %>% 
+ggplot(aes(time, speed_normalised)) +
+  geom_line() +
+  geom_line(data = env_data, aes(time, scale(lux))) 
+  # facet_grid(~ animal_id)
+
+
+
+# Applies a rolling mean/median
+# df_list_roll <- lapply(df_list, is_moving, type='median')
+# df_locomotion_roll <- bind_rows(df_list_roll) %>% 
+#   as_tibble()
+```
+
+
+# Cool plots!
+Then we'll make a few cool plots for **a single individual** to try and visualize our data!
+
+```{r plot}
+start_time <- 30 * 60
+df <- df_list[[6]]
+df.roll <- df_list.roll[[6]]
+ggplot(df, aes(get("X#wcentroid"),get('Y#wcentroid'),colour=time)) + 
+  geom_path() +
+  labs(x='', y='') +
+  theme_minimal()
+
+ggplot(df, aes(get('X#wcentroid'), get('Y#wcentroid'))) +
+  geom_hex(bins = 20) +
+  scale_fill_continuous(type = "viridis") +
+  labs(x='', y='') +
+  theme_minimal()
+
+a <- df %>%
+  filter(time > start_time) %>% 
+  ggplot(aes(time, missing, colour=time)) + #get('SPEED#smooth#wcentroid'), colour=time)) +
+    geom_line() + 
+    scale_x_continuous(limits = c(0,max(df.roll$time))) +
+    #scale_x_continuous() +
+    guides(colour="none") +
+    labs(x='', y='Velocity') +
+    theme_minimal() +
+    theme(axis.text.x = element_blank())
+
+b <- df.roll %>% 
+  filter(time > start_time) %>% 
+  ggplot(aes(time, moving)) +
+    geom_step() +
+    geom_ribbon(aes(ymin = 0, ymax = moving), alpha = .5, fill='lightskyblue') +
+    labs(x='Time') +
+    guides(fill="none") +
+    theme_minimal() +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          panel.grid.minor.y = element_blank())
+if (include_temperature == TRUE){
+  c <- temp %>%
+    filter(time > start_time & time < 2160) %>%
+    ggplot(aes(time, temperature)) +
+      geom_line() +
+      labs(y='Temperature', x='') +
+      theme_minimal() +
+      theme(axis.text.x = element_blank())
+  d <- temp %>%
+    filter(time > start_time & time < 2160) %>%
+    ggplot(aes(time, lux)) +
+    geom_line() +
+    labs(y='Lux', x='') +
+    theme_minimal() +
+    theme(axis.text.x = element_blank())
+  e <- temp %>%
+    filter(time > start_time & time < 2160) %>%
+    ggplot(aes(time, humidity)) +
+    geom_line() +
+    labs(y='RH%', x='') +
+    theme_minimal() +
+    theme(axis.text.x = element_blank())
+  
+  ggarrange(a,b,c,d,e, nrow=5, heights = c(0.9,0.2,0.4, 0.4, 0.4), align = 'hv')
+} else {
+  ggarrange(a,b, nrow=2, heights = c(0.9,0.2), align = 'hv')
+}
+
+ggplot(df, aes(get('SPEED#smooth#wcentroid (cm/s)'))) +
+  geom_histogram(binwidth=0.1, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
+  labs(x='Velocity', y='Count') +
+  theme_minimal()
+
+```
+
+```{r}
+df <- read_csv('/Users/roaldarbol/Videos/data/part1_beetle4.csv')
+df <- inf_remove(df)
+df2 <- df %>% 
+  slice(1:100000)
+speed <- smooth.spline(df$`SPEED#wcentroid (cm/s)`, spar = 0.5)
+speed_new <- tibble(time = speed$x, speed = speed$y)
+df %>% 
+  filter(get('SPEED#wcentroid (cm/s)') < 0.15) %>% 
+  nrow()
+
+ggplot(speed_new, aes(time,speed)) +
+  geom_line()
+
+df %>% 
+  filter(frame...1 > 1000000) %>% 
+ggplot(aes(timestamp, get('SPEED#smooth#wcentroid (cm/s)'))) +
+  geom_line()
+
+ggplot(df, aes(get('X#wcentroid (cm)'), get('Y#wcentroid (cm)'))) +
+  geom_hex(bins = 20) +
+  scale_fill_continuous(type = "viridis") +
+  labs(x='', y='') +
+  theme_minimal()
+```
+
