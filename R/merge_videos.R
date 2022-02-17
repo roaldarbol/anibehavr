@@ -15,10 +15,10 @@ merge_videos <- function(df_list) {
     max_time <- utils::tail(df_list[[i]]$time, 1)
     if (levels(df_list[[i]]$vid) == 2) {
       df_list[[i]] <- df_list[[i]] %>%
-        mutate(time = ~time + max_time)
+        mutate(time = .data$time + max_time)
     }
   }
 
   df <- bind_rows(df_list) %>%
-    arrange(id, time)
+    arrange(.data$id, .data$time)
 }

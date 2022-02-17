@@ -16,6 +16,7 @@ Imports:
     magrittr,
     purrr,
     tidyr,
+    tidyselect,
     zoo
 Suggests: 
     ggplot2

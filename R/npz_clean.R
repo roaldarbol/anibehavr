@@ -8,7 +8,7 @@ npz_clean <- function(df.npz){
 
   # Filter out columns of different length
   r <- r %>%
-    filter(name != 'segment_vxys' & name != 'frame_segments')
+    filter(.data$name != 'segment_vxys' & .data$name != 'frame_segments')
 
   # Make data.frame
   rown <- as.integer(r[[1,2]])

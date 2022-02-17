@@ -1,63 +1,69 @@
 #' Find position
 #'
-#' @param track_list track_list of data frames.
+#' @param df track_list of data frames.
 #' @param exp_setup Experimental setup, eith "wellplate " or "tube".
 #' @param animal_ids Vector of animal IDs, as strings.
 #'
 #' @import dplyr
 #' @importFrom forcats as_factor
 #' @importFrom tidyr unite
-#' @return
+#' @return A single tibble
 #' @export
 
 
-find_position <- function(track_list,
+find_position <- function(df,
                           exp_setup = c("wellplate", "tube"),
                           animal_ids){
-  for (i in 1:(length(track_list)/6)){
-    for (j in 1:6){
-      track_list[[j+(i-1)*6]][["id"]] <- as.factor(j)
-      track_list[[j+(i-1)*6]][["vid"]] <- as.factor(i)
-    }
-  }
 
-  df <- bind_rows(track_list)
   if (exp_setup == "wellplate") {
     mean_xy <- summarise(df,
-                         x_mean = mean(x_cm),
-                         x_range = max(x_cm) - min(x_cm),
-                         y_mean = mean(y_cm),
-                         y_range = max(y_cm) - min(y_cm))
+                         x_min = min(.data$x_cm),
+                         x_max = max(.data$x_cm),
+                         x_range = max(.data$x_cm) - min(.data$x_cm),
+                         x_center = x_min + x_range / 2,
+                         y_min = min(.data$y_cm),
+                         y_max = max(.data$y_cm),
+                         y_range = max(.data$y_cm) - min(.data$y_cm),
+                         y_center = y_min + y_range / 2)
     df <- df %>%
-      group_by(~id, ~vid) %>%
-      summarise(x = mean(x_cm),
-                y = mean(y_cm)) %>%
-      mutate(height = if_else(~y > mean_xy$y_mean, "top", "bottom"),
-             length = case_when(x < mean_xy$x_mean - mean_xy$x_range/6 ~ "left",
-                                x > mean_xy$x_mean + mean_xy$x_range/6 ~ "right",
-                                x > mean_xy$x_mean - mean_xy$x_range/6 & x < mean_xy$x_mean + mean_xy$x_range/6 ~ "middle")) %>%
-      arrange(desc(height), length) %>%
-      unite("position", height:length, remove=TRUE) %>%
-      select(~id, ~vid, ~position)
+      # group_by(.data$id, .data$vid) %>%
+      # summarise(x = mean(.data$x_cm),
+      #           y = mean(.data$y_cm)) %>%
+      mutate(height = if_else(.data$y_cm > mean_xy$y_center, "top", "bottom"),
+             length = case_when(.data$x_cm < mean_xy$x_center - mean_xy$x_range/6 ~ "left",
+                                .data$x_cm > mean_xy$x_center + mean_xy$x_range/6 ~ "right",
+                                .data$x_cm > mean_xy$x_center - mean_xy$x_range/6 & .data$x_cm < mean_xy$x_center + mean_xy$x_range/6 ~ "middle")) %>%
+      arrange(desc(.data$height), .data$length) %>%
+      unite("position", .data$height:.data$length, remove=TRUE)
+      # select(.data$id, .data$vid, .data$position)
 
-    positions <- unique(df$position)
-    df$actual_id <- NA
-
-    for (i in 1:length(positions)) {
-      df[df$position == positions[[i]],][["actual_id"]] <- animal_ids[[i]]
-    }
-
-    for (i in 1:length(track_list)) {
-      id_vid <- track_list[[i]] %>%
-        slice(1) %>%
-        select(~id, ~vid)
-
-      df_number <- which(df$id == levels(id_vid$id) &
-                           df$vid == levels(id_vid$vid))
-      track_list[[i]] <- track_list[[i]] %>%
-        mutate(animal_id = as_factor(df$actual_id[[df_number]]))
-    }
-
+  } else if (exp_setup == "tube") {
+    mean_xy <- summarise(df,
+                         x_min = min(.data$x_cm),
+                         x_max = max(.data$x_cm),
+                         x_range = max(.data$x_cm) - min(.data$x_cm),
+                         x_center = x_min + x_range / 2)
+    df <- df %>%
+      mutate(position = case_when(.data$x_cm < mean_xy$x_center - mean_xy$x_range/4 ~ "pos1",
+                                .data$x_cm < mean_xy$x_center & .data$x_cm > mean_xy$x_center - mean_xy$x_range/4 ~ "pos2",
+                                .data$x_cm > mean_xy$x_center & .data$x_cm < mean_xy$x_center + mean_xy$x_range/4 ~ "pos3",
+                                .data$x_cm > mean_xy$x_center + mean_xy$x_range/4 ~ "pos4"
+                                ))
+  } else {
+    stop("No experimental setup given")
   }
-  return(track_list)
+
+  # Do the rest of the fiddling
+  positions <- unique(df$position)
+  df$actual_id <- NA
+
+  for (i in 1:length(positions)) {
+    df[df$position == positions[[i]],][["actual_id"]] <- animal_ids[[i]]
+  }
+
+  df <- df %>%
+    mutate(animal_id = as.factor(actual_id)) %>%
+    select(-actual_id) %>%
+    as_tibble()
+  return(df)
 }

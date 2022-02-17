@@ -4,17 +4,17 @@
 \alias{find_position}
 \title{Find position}
 \usage{
-find_position(track_list, exp_setup = c("wellplate", "tube"), animal_ids)
+find_position(df, exp_setup = c("wellplate", "tube"), animal_ids)
 }
 \arguments{
-\item{track_list}{track_list of data frames.}
+\item{df}{track_list of data frames.}
 
 \item{exp_setup}{Experimental setup, eith "wellplate " or "tube".}
 
 \item{animal_ids}{Vector of animal IDs, as strings.}
 }
 \value{
-
+A single tibble
 }
 \description{
 Find position
