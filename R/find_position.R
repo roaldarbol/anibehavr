@@ -55,15 +55,16 @@ find_position <- function(df,
 
   # Do the rest of the fiddling
   positions <- unique(df$position)
+  new_animal_ids <- na.omit(animal_ids)
   df$actual_id <- NA
 
   for (i in 1:length(positions)) {
-    df[df$position == positions[[i]],][["actual_id"]] <- animal_ids[[i]]
+    df[df$position == positions[[i]],][["actual_id"]] <- new_animal_ids[[i]]
   }
 
   df <- df %>%
     mutate(animal_id = as.factor(actual_id)) %>%
     select(-actual_id) %>%
-    as_tibble()
+    filter(!is.na(animal_id))
   return(df)
 }

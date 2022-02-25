@@ -6,11 +6,11 @@
 #' @export
 #'
 correct_time <- function(data) {
-  n_vids <- unique(data$vid)
+  n_vids <- unique(na.omit(data$vid))
   for (i in 2:length(n_vids)) {
     max_time_vid <- data %>%
       filter(.data$vid == i-1) %>%
-      summarise(max_time_vid = max(.data$time)) %>%
+      summarise(max_time_vid = max(.data$time, na.rm = TRUE)) %>%
       as.numeric()
 
     data <- data %>%
