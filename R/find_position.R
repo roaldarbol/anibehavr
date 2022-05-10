@@ -25,17 +25,38 @@ find_position <- function(df,
                          y_max = max(.data$y_cm),
                          y_range = max(.data$y_cm) - min(.data$y_cm),
                          y_center = y_min + y_range / 2)
+
+    # Break right
+    df_temp <- df %>%
+      filter(x_cm > mean_xy$x_center,
+             x_cm < mean_xy$x_max)
+    x_hist <- hist(df_temp$x_cm)
+    x_min_right <- which.min(x_hist$density)
+    break_right <- x_hist$mids[x_min_right]
+
+    # Break left
+    df_temp <- df %>%
+      filter(x_cm < mean_xy$x_center,
+             x_cm > mean_xy$x_min)
+    x_hist <- hist(df_temp$x_cm)
+    x_min_left <- which.min(x_hist$density)
+    break_left <- x_hist$mids[x_min_left]
+
+    # Break vertical
+    df_temp <- df %>%
+      filter(y_cm < mean_xy$y_max,
+             y_cm > mean_xy$y_min)
+    y_hist <- hist(df_temp$y_cm)
+    y_min <- which.min(y_hist$density)
+    break_y <- y_hist$mids[y_min]
+
     df <- df %>%
-      # group_by(.data$id, .data$vid) %>%
-      # summarise(x = mean(.data$x_cm),
-      #           y = mean(.data$y_cm)) %>%
-      mutate(height = if_else(.data$y_cm > mean_xy$y_center, "top", "bottom"),
-             length = case_when(.data$x_cm < mean_xy$x_center - mean_xy$x_range/6 ~ "left",
-                                .data$x_cm > mean_xy$x_center + mean_xy$x_range/6 ~ "right",
-                                .data$x_cm > mean_xy$x_center - mean_xy$x_range/6 & .data$x_cm < mean_xy$x_center + mean_xy$x_range/6 ~ "middle")) %>%
+      mutate(height = if_else(.data$y_cm > break_y, "top", "bottom"),
+             length = case_when(.data$x_cm < break_left ~ "left",
+                                .data$x_cm > break_right ~ "right",
+                                .data$x_cm > break_left & .data$x_cm < break_right ~ "middle")) %>%
       arrange(desc(.data$height), .data$length) %>%
       unite("position", .data$height:.data$length, remove=TRUE)
-      # select(.data$id, .data$vid, .data$position)
 
   } else if (exp_setup == "tube") {
     mean_xy <- summarise(df,
