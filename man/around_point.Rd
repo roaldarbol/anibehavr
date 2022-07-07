@@ -4,14 +4,16 @@
 \alias{around_point}
 \title{Subset around point}
 \usage{
-around_point(data, var, ref_condition, time_radius)
+around_point(data, var, from, time_var, time_radius = FALSE)
 }
 \arguments{
 \item{data}{Data frame}
 
 \item{var}{Variable to center around}
 
-\item{ref_condition}{Reference point (e.g. "Day"/"Night")}
+\item{from}{Reference point (e.g. "Day"/"Night")}
+
+\item{time_var}{Which variable represents time}
 
 \item{time_radius}{Time around point}
 }

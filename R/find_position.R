@@ -44,13 +44,15 @@ find_position <- function(df,
 
     # Break vertical
     df_temp <- df %>%
-      filter(y_cm < mean_xy$y_max,
-             y_cm > mean_xy$y_min)
+      filter(y_cm < mean_xy$y_max - 1,
+             y_cm > mean_xy$y_min + 1)
     y_hist <- hist(df_temp$y_cm)
     y_min <- which.min(y_hist$density)
     break_y <- y_hist$mids[y_min]
 
     df <- df %>%
+      filter(!.data$x_cm %in% c(break_left, break_right) &
+             .data$y_cm != break_y) %>% # Make sure there's no observations right on the thresholds
       mutate(height = if_else(.data$y_cm > break_y, "top", "bottom"),
              length = case_when(.data$x_cm < break_left ~ "left",
                                 .data$x_cm > break_right ~ "right",

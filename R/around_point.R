@@ -2,50 +2,58 @@
 #'
 #' @param data Data frame
 #' @param var Variable to center around
-#' @param ref_condition Reference point (e.g. "Day"/"Night")
+#' @param from Reference point (e.g. "Day"/"Night")
+#' @param time_var Which variable represents time
 #' @param time_radius Time around point
 #'
 #' @return
 #' @export
 
-around_point <- function(data, var, ref_condition, time_radius) {
-  var <- quo(light)
+around_point <- function(data, var, from, time_var, time_radius=FALSE) {
+  # Some symbolic pointers and other annoying stuff...
+  var <- substitute(var)
   var_lag <- paste0(as_label(var),"_lag")
+  var_lag_sym <- sym(var_lag)
 
-  on <- data %>%
-    mutate(!! var_lag := lag( !! var )) %>%
-    filter(
-      !! rlang::sym(as_label(var)) == ref_condition,
-      !! rlang::sym(var_lag) != ref_condition) %>%
+  time_var <- substitute(time_var)
+  time_var_sym <- as_label(time_var)
+
+  max_time <- data %>%
     ungroup() %>%
-    select(hms_time) %>%
-    distinct() %>%
-    filter(hms_time > hms(minutes = time_radius + 5) &
-             hms_time < max(data$hms_time, na.rm = TRUE) + hms(minutes = time_radius + 5))
+    summarise(max_time = max({{ time_var }})) %>%
+    as_vector()
 
-  off <- data %>%
-    mutate(!! var_lag := lag( !! var )) %>%
+  # Find the right time
+  switch_time <- data %>%
+    mutate( !!var_lag_sym := lag( {{ var }} )) %>%
     filter(
-      !! rlang::sym(as_label(var)) != ref_condition,
-      !! rlang::sym(var_lag) == ref_condition) %>%
+      {{ var }} != from,
+      {{ var_lag_sym }} == from
+      ) %>%
     ungroup() %>%
-    select(hms_time) %>%
+    select({{ time_var }}) %>%
     distinct() %>%
-    filter(hms_time > hms(minutes = time_radius + 5) &
-             hms_time < max(data$hms_time, na.rm = TRUE) + hms(minutes = time_radius + 5))
+    filter({{ time_var }} > hms(minutes = time_radius + 5) &
+           {{ time_var }} < max_time + hms(minutes = time_radius + 5))
 
-  switch_on <- data %>%
-    filter(hms_time >= on$hms_time[1] - hms(minutes = time_radius) &
-             hms_time <= on$hms_time[1] + hms(minutes = time_radius)) %>%
-    mutate(switch = "on",
-           rel_time = difftime(hms_time, on$hms_time[1]))
+  # Now get the data
+  switch_data_all <- tibble()
+  switch_data <- data
+  rm(data)
 
-  switch_off <- data %>%
-    filter(hms_time >= off$hms_time[1] - hms(minutes = time_radius) &
-             hms_time <= off$hms_time[1] + hms(minutes = time_radius)) %>%
-    mutate(switch = "off",
-           rel_time = difftime(hms_time, off$hms_time[1]))
+  for (i in 1:nrow(switch_time)){
+    switch_i <- switch_time[[i, time_var]]
+    if (time_radius != FALSE){
+      switch_data <- switch_data %>%
+        filter({{ time_var }} >= switch_i - hms(minutes = time_radius) &
+                 {{ time_var }} <= switch_i + hms(minutes = time_radius))
+    }
+    switch_data <- switch_data %>%
+      mutate(rel_time = difftime({{ time_var }}, switch_i))
+    switch_data_all <- bind_rows(switch_data_all, switch_data)
+  }
+  rm(switch_data)
 
-  switch_all <- bind_rows(switch_on, switch_off)
-  return(switch_all)
+  return(switch_data_all)
 }
+

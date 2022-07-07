@@ -15,7 +15,7 @@ identify_periods <- function(data, var, newvar, threshold = "minmax", as_factor 
   if (is.numeric(threshold)) {
     half <- threshold
   } else if (threshold == "minmax") {
-    half <- (max(data[var.name], na.rm = TRUE) - min(data[var.name], na.rm = TRUE)) / 2
+    half <- min(data[var.name], na.rm = TRUE) + ((max(data[var.name], na.rm = TRUE) - min(data[var.name], na.rm = TRUE)) / 2)
   } else if (threshold == "mediansd") {
     half <- median(data[[var.name]], na.rm = TRUE) + sd(data[[var.name]], na.rm = TRUE)
   }
