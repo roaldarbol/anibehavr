@@ -6,14 +6,9 @@
 \arguments{
 \item{data}{Data}
 
-\item{vars}{Variables to mean}
-
 \item{n_observations}{Number of observations in output data frame}
 
 \item{group}{grouping variable}
-}
-\value{
-
 }
 \description{
 Get an average of your data where the output is n rows (approximately).

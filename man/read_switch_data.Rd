@@ -13,9 +13,6 @@ read_switch_data(filenames, bin_seconds, time_radius = FALSE)
 
 \item{time_radius}{Radius around change}
 }
-\value{
-
-}
 \description{
 Title
 }

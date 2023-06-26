@@ -52,7 +52,7 @@ find_position <- function(df,
 
     df <- df %>%
       filter(!.data$x_cm %in% c(break_left, break_right) &
-             .data$y_cm != break_y) %>% # Make sure there's no observations right on the thresholds
+               .data$y_cm != break_y) %>% # Make sure there's no observations right on the thresholds
       mutate(height = if_else(.data$y_cm > break_y, "top", "bottom"),
              length = case_when(.data$x_cm < break_left ~ "left",
                                 .data$x_cm > break_right ~ "right",
@@ -67,11 +67,13 @@ find_position <- function(df,
                          x_range = max(.data$x_cm) - min(.data$x_cm),
                          x_center = x_min + x_range / 2)
     df <- df %>%
-      mutate(position = case_when(.data$x_cm < mean_xy$x_center - mean_xy$x_range/4 ~ "pos1",
-                                .data$x_cm < mean_xy$x_center & .data$x_cm > mean_xy$x_center - mean_xy$x_range/4 ~ "pos2",
-                                .data$x_cm > mean_xy$x_center & .data$x_cm < mean_xy$x_center + mean_xy$x_range/4 ~ "pos3",
-                                .data$x_cm > mean_xy$x_center + mean_xy$x_range/4 ~ "pos4"
-                                ))
+      mutate(position = case_when(.data$x_cm < mean_xy$x_center - 2 * mean_xy$x_range/6 ~ "pos1",
+                                  .data$x_cm < mean_xy$x_center - mean_xy$x_range/6 & .data$x_cm > mean_xy$x_center - 2* mean_xy$x_range/6 ~ "pos2",
+                                  .data$x_cm < mean_xy$x_center & .data$x_cm > mean_xy$x_center - mean_xy$x_range/6 ~ "pos3",
+                                  .data$x_cm > mean_xy$x_center & .data$x_cm < mean_xy$x_center + mean_xy$x_range/6 ~ "pos4",
+                                  .data$x_cm > mean_xy$x_center & .data$x_cm < mean_xy$x_center + 2 * mean_xy$x_range/6 ~ "pos5",
+                                  .data$x_cm > mean_xy$x_center + 2 * mean_xy$x_range/6 ~ "pos6"
+      ))
   } else {
     stop("No experimental setup given")
   }

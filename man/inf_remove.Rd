@@ -9,9 +9,6 @@ inf_remove(df)
 \arguments{
 \item{df}{Data frame}
 }
-\value{
-
-}
 \description{
 Title
 }

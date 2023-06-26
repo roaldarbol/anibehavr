@@ -12,9 +12,6 @@
 
 \item{group}{grouping variable}
 }
-\value{
-
-}
 \description{
 Get an average of your data where the output is n rows (approximately).
 }
