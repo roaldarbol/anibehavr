@@ -22,6 +22,7 @@ sync_time <- function(.data, data2, x, y) {
       {{ y }} := y)
 }
 
+#' Ensure that grouping levels match across data frames - add an error/warning if not.
 #' @export
 #' @rdname join_timeseries
 join_timeseries <- function(
@@ -36,6 +37,12 @@ join_timeseries <- function(
 
   # Start out by creating all the grouping - data should have all the relevant times for each group.
   tbl_group_vars <- group_vars(.x)
+  tbl_group_vars_y <- group_vars(y)
+
+  # Throw error if the data frames uses different groupings
+  if (!identical(tbl_group_vars, tbl_group_vars_y)){
+    stop("Data frames are grouped by different variables")
+  }
 
   if (length({{ tbl_group_vars }}) > 0){
     grouped_x <- .x %>%
@@ -47,46 +54,27 @@ join_timeseries <- function(
     grouped_y <- list(y)
   }
 
+  # We join for each individual grouping
   output_list <- list()
   for (i in 1:length(grouped_x)){
-    current_x <- grouped_x[[i]]
-    current_y <- grouped_y[[i]]
-    by_x <- current_x[[{{ by }}]]
-    by_y <- current_y[[{{ by }}]]
-    by_both <- c(by_x, by_y) %>%
-      as_tibble() %>%
-      arrange(value) %>%
-      distinct() %>%
-      rename(
-        {{ by }} := value
-      )
-
-    current_combined <- by_both %>%
-      left_join(current_x, by = {{ by }}) %>%
-      left_join(current_y, by = {{ by }}, suffix = {{ suffix }})
-
-    # Finish grouping
     if (length({{ tbl_group_vars }}) > 0){
-      # Find unique grouping level
-      group_level <- current_combined %>%
-        select({{ tbl_group_vars }}) %>%
-        distinct() %>%
-        na.omit() %>%
-        pull()
-
-      # Replace NAs in grouping column
-      current_combined <- current_combined %>%
-        mutate({{ tbl_group_vars }} := {{ group_level }})
-
-
-      # Remove extra group column
-      current_combined <- current_combined %>%
-        select(-paste0({{ tbl_group_vars }}, ".y"))
+      combinations <- c(tbl_group_vars, {{ by }})
+      current_xy <- full_join(grouped_x[[i]], grouped_y[[i]], by = combinations)
+      output_list[[i]] <- current_xy
+    } else {
+      current_xy <- full_join(grouped_x[[i]], grouped_y[[i]], by = {{ by }})
+      output_list[[i]] <- current_xy
     }
-
-    output_list[[i]] <- current_combined
   }
 
-  output_tibble <- bind_rows(output_list)
+  # Then we bind to a tibble and arrange by grouping and {{ by }} (time)
+  if (length({{ tbl_group_vars }}) > 0){
+    output_tibble <- bind_rows(output_list) %>%
+      arrange(!!! rlang::syms(c({{ combinations }})))
+  } else {
+    output_tibble <- bind_rows(output_list)
+    output_tibble <- output_tibble %>%
+      arrange(!! rlang::sym(c({{ by }})))
+    }
   return(output_tibble)
 }
