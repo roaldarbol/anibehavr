@@ -4,16 +4,16 @@
 \alias{sync_time}
 \title{Sync time}
 \usage{
-sync_time(.data, x, y, data2)
+sync_time(.data, data2, x, y)
 }
 \arguments{
 \item{.data}{Data frame or tibble}
 
+\item{data2}{The second data frame}
+
 \item{x}{Parameter used to merge (often time)}
 
 \item{y}{Variable to be synced along with x}
-
-\item{data2}{The second data frame}
 }
 \value{
 Tibble
