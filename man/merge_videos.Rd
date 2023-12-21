@@ -9,6 +9,9 @@ merge_videos(df_list)
 \arguments{
 \item{df_list}{List of data frames}
 }
+\value{
+Merged data frame from list
+}
 \description{
 Merges data sets for consecutive videos for each animal.
 }

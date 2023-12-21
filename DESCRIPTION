@@ -17,7 +17,8 @@ Imports:
     purrr,
     tidyr,
     tidyselect,
-    zoo
+    zoo,
+    data.table
 Suggests: 
     ggplot2,
     testthat (>= 3.0.0)

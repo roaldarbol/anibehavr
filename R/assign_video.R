@@ -11,12 +11,15 @@ assign_video <- function(track_list, animal_ids) {
     na.omit() %>%
     length()
 
-  n_vids <- track_list %>%
-    bind_rows() %>%
-    filter(time == 0) %>%
-    distinct() %>%
-    summarise(n_vids = n() / n_animals) %>%
-    as_vector()
+  n_vids <- length(track_list) / n_animals
+
+  # Old way - keep in case the other one breaks
+  # n_vids <- track_list %>%
+  #   bind_rows() %>%
+  #   filter(time == 0) %>%
+  #   distinct() %>%
+  #   summarise(n_vids = n() / n_animals) %>%
+  #   as_vector()
 
   for (i in 1:n_vids){
     for (j in 1:n_animals){

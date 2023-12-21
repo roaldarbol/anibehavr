@@ -2,7 +2,7 @@
 #'
 #' @param x Vector to find the mode over
 #'
-#' @return
+#' @return Mode
 #' @export
 #'
 

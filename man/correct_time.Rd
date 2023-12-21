@@ -9,6 +9,9 @@ correct_time(data)
 \arguments{
 \item{data}{}
 }
+\value{
+A data frame where times are added.
+}
 \description{
 Correct time
 }

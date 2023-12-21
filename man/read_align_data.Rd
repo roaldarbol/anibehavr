@@ -11,6 +11,9 @@ read_align_data(filename, bin_seconds)
 
 \item{bin_seconds}{Bin duration in seconds}
 }
+\value{
+Aligned data frame
+}
 \description{
 Title
 }

@@ -17,6 +17,9 @@ around_point(data, var, from, time_var, time_radius = FALSE)
 
 \item{time_radius}{Time around point}
 }
+\value{
+Subset of data frame around point in time
+}
 \description{
 Subset around point
 }

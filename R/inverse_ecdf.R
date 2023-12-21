@@ -5,7 +5,7 @@
 #' @param min_length Minimal starting duration in frames
 #' @param rest_state Whether to make the ecdf for resting or active periods. TRUE or FALSE (default)
 #'
-#' @return
+#' @return Inverse ECDF
 #' @export
 
 inverse_ecdf <- function(data, col, min_length, rest_state = FALSE) {

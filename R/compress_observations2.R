@@ -9,7 +9,7 @@
 #' @param group grouping variable
 #' @import dplyr
 #' @importFrom utils globalVariables
-#' @return
+#' @return Smaller data frame where values are means of N observations
 #' @export
 
 utils::globalVariables("where")

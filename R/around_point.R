@@ -6,7 +6,7 @@
 #' @param time_var Which variable represents time
 #' @param time_radius Time around point
 #'
-#' @return
+#' @return Subset of data frame around point in time
 #' @export
 
 around_point <- function(data, var, from, time_var, time_radius=FALSE) {

@@ -14,7 +14,7 @@
 #' @param data Data
 #' @param ... Other
 #'
-#' @return
+#' @return Added logticks
 #' @export
 
 add_logticks  <- function (base = 10, sides = "bl", scaled = TRUE,

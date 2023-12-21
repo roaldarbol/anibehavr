@@ -3,7 +3,7 @@
 #' @param df Data frame
 #'
 #' @importFrom purrr is_empty
-#' @return
+#' @return A data frame without Inf values
 #' @export
 #'
 

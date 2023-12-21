@@ -6,7 +6,7 @@
 #' @param threshold Method for thresholding. Either "minmax", "mediansd" or a number.
 #' @param as_factor Whether an output should be returned as factor
 #'
-#' @return
+#' @return Thresholded data frame
 #' @export
 
 identify_periods <- function(data, var, newvar, threshold = "minmax", as_factor = FALSE) {

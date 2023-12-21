@@ -9,6 +9,9 @@ mode_nonnumeric(x)
 \arguments{
 \item{x}{Vector to find the mode over}
 }
+\value{
+Mode
+}
 \description{
 Non-numeric mode
 }

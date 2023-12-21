@@ -2,7 +2,7 @@
 #'
 #' @param x
 #'
-#' @return
+#' @return Normalisation
 #' @export
 min_max_norm <- function(x) {
   (x - min(x)) / (max(x) - min(x))

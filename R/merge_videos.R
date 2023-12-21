@@ -6,7 +6,7 @@
 #'
 #' @import dplyr
 #' @importFrom utils tail
-#' @return
+#' @return Merged data frame from list
 #' @export
 #'
 

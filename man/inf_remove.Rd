@@ -9,6 +9,9 @@ inf_remove(df)
 \arguments{
 \item{df}{Data frame}
 }
+\value{
+A data frame without Inf values
+}
 \description{
 Title
 }

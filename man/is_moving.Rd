@@ -13,6 +13,9 @@ is_moving(df, type, n_frames = 50)
 
 \item{n_frames}{Number of frames used to generate rolling average.}
 }
+\value{
+Data frame with a value for whether the animal is moving
+}
 \description{
 is_moving
 }

@@ -4,7 +4,7 @@
 #' @param bin_seconds Bin duration in seconds
 #' @param time_radius Radius around change
 #'
-#' @return
+#' @return Switch data
 #' @export
 #'
 read_switch_data <- function(filenames, bin_seconds, time_radius=FALSE){

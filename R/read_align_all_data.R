@@ -3,7 +3,7 @@
 #' @param filenames Filenames
 #' @param bin_seconds Bin duration in seconds
 #'
-#' @return
+#' @return Aligned data frame
 #' @export
 #'
 read_align_all_data <- function(filenames, bin_seconds){

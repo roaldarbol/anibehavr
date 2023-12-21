@@ -5,7 +5,7 @@
 #' @param n_frames Number of frames used to generate rolling average.
 #'
 #' @import dplyr
-#' @return
+#' @return Data frame with a value for whether the animal is moving
 #' @export
 #'
 

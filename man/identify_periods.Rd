@@ -17,6 +17,9 @@ identify_periods(data, var, newvar, threshold = "minmax", as_factor = FALSE)
 
 \item{as_factor}{Whether an output should be returned as factor}
 }
+\value{
+Thresholded data frame
+}
 \description{
 IDENTIFY PERIODS OF INTEREST
 }

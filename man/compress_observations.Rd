@@ -10,6 +10,9 @@
 
 \item{group}{grouping variable}
 }
+\value{
+Smaller data frame where values are means of N observations
+}
 \description{
 Get an average of your data where the output is n rows (approximately).
 }
