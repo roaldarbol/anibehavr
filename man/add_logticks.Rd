@@ -47,9 +47,6 @@ add_logticks(
 
 \item{...}{Other}
 }
-\value{
-
-}
 \description{
 Add logticks
 }

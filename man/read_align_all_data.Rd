@@ -11,9 +11,6 @@ read_align_all_data(filenames, bin_seconds)
 
 \item{bin_seconds}{Bin duration in seconds}
 }
-\value{
-
-}
 \description{
 Title
 }

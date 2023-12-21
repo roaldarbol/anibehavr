@@ -4,7 +4,6 @@
 #'
 #' @name compress_observations
 #' @param data Data
-#' @param vars Variables to mean
 #' @param n_observations Number of observations in output data frame
 #' @param group grouping variable
 #' @import dplyr
@@ -13,14 +12,18 @@
 #' @export
 
 utils::globalVariables("where")
-compress_observations <- function(data, vars = where(is.numeric), n_observations, group = NULL) {
+compress_observations <- function(data, n_observations, group = NULL) {
   data_short <- data %>%
     group_by({{ group }}) %>%
     mutate(G = trunc(2:(n()+1)/(nrow(data)/n_observations))) %>%
     ungroup() %>%
+    drop_na() %>%
     group_by({{ group }}, .data$G) %>%
-    summarise(across({{ vars }}, ~ mean(.x, na.rm = TRUE)),
-              time = min(.data$time)) %>%
+    summarise(
+      across(where(is.numeric), ~ mean(., na.rm = TRUE)),
+      across(where(negate(is.numeric)), ~ mode_nonnumeric(.)),
+      time = min(.data$time)
+      ) %>%
     ungroup() %>%
     select(-.data$G)
 }

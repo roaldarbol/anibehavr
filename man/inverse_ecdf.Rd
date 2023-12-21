@@ -15,9 +15,6 @@ inverse_ecdf(data, col, min_length, rest_state = FALSE)
 
 \item{rest_state}{Whether to make the ecdf for resting or active periods. TRUE or FALSE (default)}
 }
-\value{
-
-}
 \description{
 inverse_ecdf
 }

@@ -52,7 +52,7 @@ find_position <- function(df,
 
     df <- df %>%
       filter(!.data$x_cm %in% c(break_left, break_right) &
-             .data$y_cm != break_y) %>% # Make sure there's no observations right on the thresholds
+               .data$y_cm != break_y) %>% # Make sure there's no observations right on the thresholds
       mutate(height = if_else(.data$y_cm > break_y, "top", "bottom"),
              length = case_when(.data$x_cm < break_left ~ "left",
                                 .data$x_cm > break_right ~ "right",
@@ -60,34 +60,44 @@ find_position <- function(df,
       arrange(desc(.data$height), .data$length) %>%
       unite("position", .data$height:.data$length, remove=TRUE)
 
-  } else if (exp_setup == "tube") {
-    mean_xy <- summarise(df,
-                         x_min = min(.data$x_cm),
-                         x_max = max(.data$x_cm),
-                         x_range = max(.data$x_cm) - min(.data$x_cm),
-                         x_center = x_min + x_range / 2)
+    # Do the rest of the fiddling
+    positions <- unique(df$position)
+    positions <- na.omit(positions)
+    new_animal_ids <- na.omit(animal_ids)
+    df$actual_id <- NA
+
+    for (i in 1:length(positions)) {
+      df[df$position == positions[[i]],][["actual_id"]] <- new_animal_ids[[i]]
+    }
+
     df <- df %>%
-      mutate(position = case_when(.data$x_cm < mean_xy$x_center - mean_xy$x_range/4 ~ "pos1",
-                                .data$x_cm < mean_xy$x_center & .data$x_cm > mean_xy$x_center - mean_xy$x_range/4 ~ "pos2",
-                                .data$x_cm > mean_xy$x_center & .data$x_cm < mean_xy$x_center + mean_xy$x_range/4 ~ "pos3",
-                                .data$x_cm > mean_xy$x_center + mean_xy$x_range/4 ~ "pos4"
-                                ))
+      mutate(animal_id = as.factor(actual_id)) %>%
+      select(-actual_id) %>%
+      filter(!is.na(animal_id))
+
+  } else if (exp_setup == "tube") {
+    new_animal_ids <- na.omit(animal_ids)
+    n_animals <- new_animal_ids |>
+      length()
+    d <- density(df$x_cm)
+    highest_peaks <- data.frame(d[c("x", "y")])[c(F, diff(diff(d$y)>=0)<0),] |>
+      arrange(y) |>
+      slice_tail(n = n_animals) |>
+      arrange(x) |>
+      mutate(animal_id = new_animal_ids)
+    min_distance <- min(diff(highest_peaks$x))
+
+    # Found this solution at https://stackoverflow.com/a/43472391/13240268
+    cuts <- c(-Inf, highest_peaks$x[-1]-diff(highest_peaks$x)/2, Inf)
+    positions <- cut(df$x_cm, breaks=cuts, labels=highest_peaks$animal_id) |>
+      as_tibble() |>
+      rename(animal_id = value)
+    df <- df |>
+      bind_cols(positions) |>
+      select(-id)
+
   } else {
     stop("No experimental setup given")
   }
-
-  # Do the rest of the fiddling
-  positions <- unique(df$position)
-  new_animal_ids <- na.omit(animal_ids)
-  df$actual_id <- NA
-
-  for (i in 1:length(positions)) {
-    df[df$position == positions[[i]],][["actual_id"]] <- new_animal_ids[[i]]
-  }
-
-  df <- df %>%
-    mutate(animal_id = as.factor(actual_id)) %>%
-    select(-actual_id) %>%
-    filter(!is.na(animal_id))
   return(df)
 }

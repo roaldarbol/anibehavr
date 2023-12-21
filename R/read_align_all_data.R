@@ -45,14 +45,9 @@ read_align_all_data <- function(filenames, bin_seconds){
       distinct()
 
     aligned_data_short <- aligned_data %>%
-      # group_by(animal_id) %>%
-      # filter(row_number() %% (30 * bin_seconds) == 1) %>%
       compress_observations(n_observations = nrow(aligned_data) / (30 * bin_seconds),
                             group = animal_id) %>%
-      mutate(rowid = row_number(),
-             date = meta$date,
-             species = meta$species,
-             light_condition = meta$light_condition)
+      mutate(rowid = row_number())
     rm(aligned_data)
     aligned_data_short_all <- bind_rows(aligned_data_short_all, aligned_data_short)
     rm(aligned_data_short)

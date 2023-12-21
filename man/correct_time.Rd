@@ -9,9 +9,6 @@ correct_time(data)
 \arguments{
 \item{data}{}
 }
-\value{
-
-}
 \description{
 Correct time
 }

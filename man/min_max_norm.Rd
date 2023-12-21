@@ -9,9 +9,6 @@ min_max_norm(x)
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 Min-max normalisation
 }
