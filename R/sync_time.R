@@ -45,6 +45,21 @@ join_timeseries <- function(
   }
 
   if (length({{ tbl_group_vars }}) > 0){
+    # Only keep group keys with observations in both data frames
+    keys_x <- .x %>%
+      group_keys()
+    keys_y <- y %>%
+      group_keys()
+    keys_both <- merge(keys_x, keys_y)
+    .x <- inner_join(.x, keys_both, by = {{ tbl_group_vars }})
+    y <- inner_join(y, keys_both, by = {{ tbl_group_vars_y }})
+
+    # If there are no matches, give an informative error message
+    if (nrow(keys_both) == 0){
+      stop("Found no matches between groups. Check the grouping variables in both data frames.")
+    }
+
+    # Split by groups
     grouped_x <- .x %>%
       group_split()
     grouped_y <- y %>%

@@ -24,6 +24,7 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
     value = c(1,2,3,4,5,6)
   ) %>%
     group_by(id, trial)
+
   df_id_multi_2 <- tibble(
     time = c(1,2,3,4,2,3),
     id = c(1,1,1,2,2,2),
@@ -31,6 +32,15 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
     value2 = c(1,2,3,4,5,6)
   ) %>%
     group_by(id, trial)
+
+  df_id_multi_extra <- tibble(
+    time = c(1,2,3,4,2,3),
+    id = c(1,1,1,2,2,3),
+    trial = c(1,1,2,1,1,2),
+    value2 = c(1,2,3,4,5,6)
+  ) %>%
+    group_by(id, trial)
+
   df_id_multi_wrong_group <- tibble(
     time = c(1,2,3,4,2,3),
     id = c(1,1,1,2,2,2),
@@ -63,6 +73,12 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
       y = df_id_multi_2,
       by = "time")
 
+  # Group_by, with multiple groups
+  df_test_multi_extra <- df_id_multi %>%
+    join_timeseries(
+      y = df_id_multi_extra,
+      by = "time")
+
   # Expected output (made with `constructive::construct()`)
   expected_default <- tibble(
     time = seq(0, 2.5, by = 0.5),
@@ -91,15 +107,28 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
     value2 = c(1, 2, 3, NA, 5, 4, 6, NA),
   )
 
+  expected_multi_extra <- tibble::tibble(
+    time = c(1, 2, 3, 1, 2, 4),
+    id = rep(c(1, 2), each = 3L),
+    trial = c(1, 1, 2, 1, 1, 1),
+    value = c(1, 2, 3, 4, 5, NA),
+    value2 = c(1, 2, 3, NA, 5, 4),
+  )
+
   expect_equal(df_test_default, expected_default)
   # expect_equal(df_test_default_suffix, expected_default_suffix)
   expect_equal(df_test_single_group, expected_single_group)
   expect_equal(df_test_multi_group, expected_multi_group)
-  # expect_equal() # For unmatched and dropped groupings
+  expect_equal(df_test_multi_extra, expected_multi_extra) # For unmatched and dropped groupings
   expect_error(join_timeseries(
     .x = df_test_multi_group,
     y = df_id_multi_wrong_group,
     by = "time"),
     "Data frames are grouped by different variables"
     ) # For different groupings
+  # expect_error(join_timeseries(
+  #   .x = df_test_multi_group,
+  #   y = df_id_multi_wrong_group,
+  #   by = "time"),
+  #   "Found no matches between groups. Check the grouping variables in both data frames.") # For no matching groups
 })

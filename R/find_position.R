@@ -81,7 +81,16 @@ find_position <- function(df,
   # Do the rest of the fiddling
   positions <- unique(df$position)
   new_animal_ids <- na.omit(animal_ids)
+
+  # Get rid of the accidental NAs that are exactly on the borders
+  df <- df %>%
+    na.omit()
+
+  # Create new variable
   df$actual_id <- NA
+
+  # t <- df %>%
+  #   filter(is.na(position))
 
   for (i in 1:length(positions)) {
     df[df$position == positions[[i]],][["actual_id"]] <- new_animal_ids[[i]]
