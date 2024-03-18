@@ -22,13 +22,9 @@ classify_states <- function(
     group_modify(
       ~ filter_forward_backward(
         .x,
-        movement_var = movement_var,
-        window_width = window_width)
-      )
-
-  # Compute state
-  # The state is high only when both filters are high
-  data <- data |>
+        movement_var = is_locomoting,
+        window_width = 10)
+    ) |>
     dplyr::mutate(
       rolling_right = dplyr::if_else(rolling_right > 0, 1, 0),
       rolling_left = dplyr::if_else(rolling_left > 0, 1, 0),
@@ -36,7 +32,7 @@ classify_states <- function(
       state_change = dplyr::if_else(state != dplyr::lag(state), 1, 0),
       state_change = dplyr::if_else(is.na(state_change), 0, state_change),
       state_number = cumsum(state_change)
-      )
+    )
 
   # Get rid of the filters themselves
   if (.keep == FALSE){
