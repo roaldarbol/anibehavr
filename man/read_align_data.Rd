@@ -4,12 +4,12 @@
 \alias{read_align_data}
 \title{Title}
 \usage{
-read_align_data(filename, bin_seconds)
+read_align_data(data, bin_seconds, time, animal_id)
 }
 \arguments{
-\item{filename}{Filenames}
-
 \item{bin_seconds}{Bin duration in seconds}
+
+\item{filename}{Filenames}
 }
 \value{
 Aligned data frame

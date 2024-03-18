@@ -4,7 +4,7 @@
 \alias{assign_video}
 \title{Assign video}
 \usage{
-assign_video(track_list, animal_ids)
+assign_video(track_list, animal_ids, tracker = c("trex", "idtrackerai"))
 }
 \arguments{
 \item{track_list}{List from video files}

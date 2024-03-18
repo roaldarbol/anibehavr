@@ -7,6 +7,8 @@
 #' @import dplyr
 #' @importFrom forcats as_factor
 #' @importFrom tidyr unite
+#' @importFrom graphics hist
+#' @importFrom stats na.omit median
 #' @return A single tibble
 #' @export
 
@@ -30,7 +32,7 @@ find_position <- function(df,
     df_temp <- df %>%
       filter(x_cm > mean_xy$x_center,
              x_cm < mean_xy$x_max)
-    x_hist <- hist(df_temp$x_cm)
+    x_hist <- graphics::hist(df_temp$x_cm)
     x_min_right <- which.min(x_hist$density)
     break_right <- x_hist$mids[x_min_right]
 
@@ -62,8 +64,8 @@ find_position <- function(df,
 
     # Do the rest of the fiddling
     positions <- unique(df$position)
-    positions <- na.omit(positions)
-    new_animal_ids <- na.omit(animal_ids)
+    positions <- stats::na.omit(positions)
+    new_animal_ids <- stats::na.omit(animal_ids)
     df$actual_id <- NA
 
     for (i in 1:length(positions)) {
@@ -76,25 +78,27 @@ find_position <- function(df,
       filter(!is.na(animal_id))
 
   } else if (exp_setup == "tube") {
-    new_animal_ids <- na.omit(animal_ids)
+    new_animal_ids <- stats::na.omit(animal_ids)
     n_animals <- new_animal_ids |>
       length()
-    d <- density(df$x_cm)
+    d <- density(stats::na.omit(df$x))
     highest_peaks <- data.frame(d[c("x", "y")])[c(F, diff(diff(d$y)>=0)<0),] |>
       arrange(y) |>
       slice_tail(n = n_animals) |>
       arrange(x) |>
       mutate(animal_id = new_animal_ids)
-    min_distance <- min(diff(highest_peaks$x))
 
     # Found this solution at https://stackoverflow.com/a/43472391/13240268
-    cuts <- c(-Inf, highest_peaks$x[-1]-diff(highest_peaks$x)/2, Inf)
-    positions <- cut(df$x_cm, breaks=cuts, labels=highest_peaks$animal_id) |>
+    space <- stats::median(diff(highest_peaks$x)/2)
+    cuts <- c(min(highest_peaks$x)-space, highest_peaks$x[-1]-diff(highest_peaks$x)/2, max(highest_peaks$x)+space)
+    positions <- cut(df$x, breaks=cuts, labels=highest_peaks$animal_id) |>
       as_tibble() |>
       rename(animal_id = value)
     df <- df |>
       bind_cols(positions) |>
-      select(-id)
+      stats::na.omit() |>
+      group_by(animal_id, time) |>
+      complete()
 
   } else {
     stop("No experimental setup given")

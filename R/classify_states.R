@@ -16,21 +16,19 @@ classify_states <- function(
     data,
     movement_var,
     window_width,
-    group = "animal_id"){
+    .keep = FALSE){
 
-  group_var <- enquo(group)
-
-  # Some data.table magic to find minimum values in the classification in specified time windows
-  # Rather than using rolling minimum (which is *incredibly* slow), we use a rolling sum and an "if_else(sum>0)"-approach
-  data.table::setDT(data)
-  data[, rolling_right := data.table::frollsum(movement_var, n = window_width, algo = "fast", align = "right"), by = group_var]
-  data[, rolling_left := data.table::frollsum(movement_var, n = window_width, algo = "fast", align = "left"), by = group_var]
-  data.table::setDF(data)
+  data <- data |>
+    group_modify(
+      ~ filter_forward_backward(
+        .x,
+        movement_var = movement_var,
+        window_width = window_width)
+      )
 
   # Compute state
   # The state is high only when both filters are high
   data <- data |>
-    dplyr::group_by(group) |>
     dplyr::mutate(
       rolling_right = dplyr::if_else(rolling_right > 0, 1, 0),
       rolling_left = dplyr::if_else(rolling_left > 0, 1, 0),
@@ -39,5 +37,12 @@ classify_states <- function(
       state_change = dplyr::if_else(is.na(state_change), 0, state_change),
       state_number = cumsum(state_change)
       )
+
+  # Get rid of the filters themselves
+  if (.keep == FALSE){
+    data <- data |>
+      select(-rolling_right, -rolling_left)
+  }
   return(data)
 }
+

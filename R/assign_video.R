@@ -6,25 +6,24 @@
 #' @return track_list
 #' @export
 
-assign_video <- function(track_list, animal_ids) {
+assign_video <- function(track_list, animal_ids, tracker = c("trex", "idtrackerai")) {
   n_animals <- animal_ids %>%
     na.omit() %>%
     length()
 
-  n_vids <- length(track_list) / n_animals
+  if (tracker == "trex"){
+    n_vids <- length(track_list) / n_animals
 
-  # Old way - keep in case the other one breaks
-  # n_vids <- track_list %>%
-  #   bind_rows() %>%
-  #   filter(time == 0) %>%
-  #   distinct() %>%
-  #   summarise(n_vids = n() / n_animals) %>%
-  #   as_vector()
-
-  for (i in 1:n_vids){
-    for (j in 1:n_animals){
-      track_list[[j+(i-1)*n_animals]][["id"]] <- as.factor(j)
-      track_list[[j+(i-1)*n_animals]][["vid"]] <- as.factor(i)
+    for (i in 1:n_vids){
+      for (j in 1:n_animals){
+        track_list[[j+(i-1)*n_animals]][["id"]] <- as.factor(j)
+        track_list[[j+(i-1)*n_animals]][["vid"]] <- as.factor(i)
+      }
+    }
+  } else if (tracker == "idtrackerai"){
+    n_vids <- length(track_list)
+    for (i in 1:n_vids){
+      track_list[[i]][["vid"]] <- as.factor(i)
     }
   }
 

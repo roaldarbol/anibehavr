@@ -1,4 +1,4 @@
-#' Subset around point
+#' Subset Around Event
 #'
 #' @param data Data frame
 #' @param var Variable to center around
@@ -9,7 +9,7 @@
 #' @return Subset of data frame around point in time
 #' @export
 
-around_point <- function(data, var, from, time_var, time_radius=FALSE) {
+subset_around_event <- function(data, var, from, time_var, time_radius = FALSE) {
   # Some symbolic pointers and other annoying stuff...
   var <- substitute(var)
   var_lag <- paste0(as_label(var),"_lag")
