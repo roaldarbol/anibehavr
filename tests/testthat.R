@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(sleeprex)
+library(anibehavr)
 
-test_check("sleeprex")
+test_check("anibehavr")

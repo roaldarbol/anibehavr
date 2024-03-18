@@ -6,3 +6,4 @@
 *.DS_Store
 .httr-oauth
 .Rproj.user
+.vscode
