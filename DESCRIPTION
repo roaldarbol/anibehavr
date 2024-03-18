@@ -3,7 +3,7 @@ Title: Analyse Animal Behaviours
 Version: 0.1.0
 Authors@R: 
     person("Mikkel", "Roald-Arbøl", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           comment = c(ORCID = "0000-0002-9998-0058"))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
