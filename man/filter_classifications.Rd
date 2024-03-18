@@ -4,10 +4,15 @@
 \alias{filter_classifications}
 \title{Filter Classifications}
 \usage{
-filter_classifications(data, window_size, group)
+filter_classifications(data, window_widths)
 }
 \arguments{
-\item{group}{}
+\item{data}{Data frame}
+
+\item{window_widths}{Minimum duration of bout}
+}
+\value{
+Filtered data frame
 }
 \description{
 Filter Classifications

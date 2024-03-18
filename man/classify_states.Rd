@@ -4,14 +4,19 @@
 \alias{classify_states}
 \title{Classify states Across Time-scales}
 \usage{
-classify_states(data, movement_var, window_width, .keep = FALSE)
+classify_states(data, movement_var, window_widths, .keep = FALSE)
 }
 \arguments{
 \item{data}{Data frame}
 
-\item{window_width}{Window width in number of frames}
+\item{movement_var}{Binary (1/0) variable to be used for the classification}
 
-\item{group}{}
+\item{window_widths}{Window width for the filter}
+
+\item{.keep}{Keep both intermediate filter components (forward/backward)}
+}
+\value{
+Data frame with classifications
 }
 \description{
 Classify states Across Time-scales

@@ -1,17 +1,14 @@
 #' Classify states Across Time-scales
 #'
 #' @param data Data frame
-#' @param window_width Window width in number of frames
-#' @param movement_var
-#' @param group
+#' @param window_widths Window width for the filter
+#' @param .keep Keep both intermediate filter components (forward/backward)
+#' @param movement_var Binary (1/0) variable to be used for the classification
 #'
 #' @import data.table
 #' @import dplyr
-#' @importFrom rlang enquo
-#' @return
+#' @return Data frame with classifications
 #' @export
-#'
-#' @examples
 classify_states <- function(
     data,
     movement_var,
@@ -44,7 +41,7 @@ classify_states <- function(
         "{{ state_number }}" := cumsum({{ state_change }})
       ) |>
       ungroup() |>
-      select(last_col(4):last_col())
+      select(last_col(4):last_col(), -{{ state_change }})
     data <- bind_cols(data, new_cols)
   }
 

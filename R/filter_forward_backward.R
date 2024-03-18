@@ -7,8 +7,6 @@
 #'
 #' @return
 #' @export
-#'
-#' @examples
 filter_forward_backward <- function(data, movement_var, window_width){
   movement_var <- substitute(movement_var)
 
