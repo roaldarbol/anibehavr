@@ -33,7 +33,7 @@ classify_states <- function(
         ~ filter_forward_backward(
           .x,
           movement_var = is_locomoting,
-          window_width = 10)
+          window_width = window_widths[i])
       ) |>
       dplyr::mutate(
         "{{ rolling_right_new }}" := dplyr::if_else(rolling_right > 0, 1, 0),
