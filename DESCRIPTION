@@ -1,6 +1,6 @@
 Package: anibehavr
 Title: Analyse Animal Behaviours
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: 
     person("Mikkel", "Roald-Arbøl", , "first.last@example.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
