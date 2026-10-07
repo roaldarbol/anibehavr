@@ -22,7 +22,16 @@ sync_time <- function(.data, data2, x, y) {
       {{ y }} := y)
 }
 
-#' Ensure that grouping levels match across data frames - add an error/warning if not.
+#' Ensure that grouping levels match across data frames - add an error/warning
+#' if not.
+#' @param method Which timestamps to keep, and how to match observations. `NA`
+#'   keeps all all observations, resulting in NAs when timestamps do not match.
+#'   Most solutions only keep observations from the data with the lowest
+#'   sampling rate and integrate observations from the data with highest
+#'   sampling rate. `nearest` matches to the nearest observation.
+#'   `nearest_before` uses the nearest observation before. `nearest_after` uses
+#'   the nearest observation after. `mean_before` calculates the mean from the
+#'   interval before. `mean_after` calculates the mean from the interval after.
 #' @export
 #' @rdname join_timeseries
 join_timeseries <- function(
@@ -35,6 +44,7 @@ join_timeseries <- function(
     suffix = c("", ".y"),
     keep = NULL) {
 
+  # I think we should adopt the "join" way of doing things, so the user NEEDS to specify the grouping
   # Start out by creating all the grouping - data should have all the relevant times for each group.
   tbl_group_vars <- group_vars(.x)
   tbl_group_vars_y <- group_vars(y)
@@ -90,6 +100,18 @@ join_timeseries <- function(
     output_tibble <- bind_rows(output_list)
     output_tibble <- output_tibble %>%
       arrange(!! rlang::sym(c({{ by }})))
-    }
+  }
+
+  # Here we decide how exactly to combine the two data frames
+  # The "method" parameter determines the behaviour here
+  if (method == "match_last"){
+
+  } else if (method == "match_first"){
+
+  } else if (method == ""){
+
+  }
+
+
   return(output_tibble)
 }

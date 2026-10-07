@@ -8,13 +8,13 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
     time = c(1,2,3,1,2,3),
     id = c(1,1,1,2,2,2),
     value = c(1,2,3,4,5,6)
-    ) %>%
+    ) |>
     group_by(id)
   df_id_single_2 <- tibble(
     time = c(1,2,3,4,2,3),
     id = c(1,1,1,2,2,2),
     value2 = c(1,2,3,4,5,6)
-    ) %>%
+    ) |>
     group_by(id)
 
   df_id_multi <- tibble(
@@ -22,7 +22,7 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
     id = c(1,1,1,2,2,2),
     trial = c(1,1,2,1,1,2),
     value = c(1,2,3,4,5,6)
-  ) %>%
+  ) |>
     group_by(id, trial)
 
   df_id_multi_2 <- tibble(
@@ -30,7 +30,7 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
     id = c(1,1,1,2,2,2),
     trial = c(1,1,2,1,1,2),
     value2 = c(1,2,3,4,5,6)
-  ) %>%
+  ) |>
     group_by(id, trial)
 
   df_id_multi_extra <- tibble(
@@ -38,7 +38,7 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
     id = c(1,1,1,2,2,3),
     trial = c(1,1,2,1,1,2),
     value2 = c(1,2,3,4,5,6)
-  ) %>%
+  ) |>
     group_by(id, trial)
 
   df_id_multi_wrong_group <- tibble(
@@ -46,35 +46,53 @@ test_that("Test join_timeseries to gather two unsyncronised data frames", {
     id = c(1,1,1,2,2,2),
     trial = c(1,1,2,1,1,2),
     value2 = c(1,2,3,4,5,6)
-  ) %>%
+  ) |>
     group_by(id)
 
+  df_a <- tibble(
+    time = seq(from = 0, to = 10, length.out = 100),
+    value_a = rnorm(100)
+    )
+
+  df_b <- tibble(
+    time = seq(from = 0, to = 10, length.out = 1000),
+    value_b = rnorm(1000, mean = 2)
+    )
+
+  # The joining variable must be present in both data frames (here "time")
+  df_test_default <- join_timeseries(df_a, df_b, by = "time")
+
+  df_a_gr <- bind_rows(mutate(df_a, ID = "bee1"), mutate(df_a, ID = "bee2"))
+  df_b_gr <- bind_rows(mutate(df_b, ID = "bee1"), mutate(df_b, ID = "bee2"))
+
+  df_comb_gr <- anibehavr::join_timeseries(df_a_gr, df_b_gr, by = "time", group = "ID", keep = TRUE)
+
   # Run the default function with non-conflicting column names
-  df_test_default <- df_a %>%
+  df_test_default <- df_a |>
     join_timeseries(
       y = df_b,
       by = "time")
 
   # With conflicting column names, default suffix
-  df_test_default_suffix <- df_a %>%
+  df_test_default_suffix <- df_a |>
     join_timeseries(
       y = df_a,
       by = "time")
 
   # Group_by, with a single group
-  df_test_single_group <- df_id_single %>%
+  df_test_single_group <- df_id_single |>
     join_timeseries(
       y = df_id_single_2,
       by = "time")
 
   # Group_by, with multiple groups
-  df_test_multi_group <- df_id_multi %>%
+  df_test_multi_group <- df_id_multi |>
     join_timeseries(
       y = df_id_multi_2,
       by = "time")
 
   # Group_by, with multiple groups
-  df_test_multi_extra <- df_id_multi %>%
+  df_test_multi_extra <- df_id_multi |>
     join_timeseries(
       y = df_id_multi_extra,
       by = "time")
